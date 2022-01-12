@@ -1,9 +1,9 @@
 <template>
   <div>
       <span v-html="welcomeMessage" v-hide></span>
-      <form v-hide>
+      <form v-on:submit.prevent="setPlayer" v-hide>
             <input name="player" placeholder="Entrez votre nom" v-border:blue>
-            <button type="submit">
+            <button type="submit" v-border:green>
                 Jouer
             </button>
       </form>
@@ -13,24 +13,40 @@
 <script>
 export default {
   name: 'player',
-  created: function () {
-      this.player = 'Tof'
-      this.playerClass = this.player ? 'player' : 'playerForm'
-      this.welcomeMessage = this.player ? `Bonjour <span class="player"> ${this.player} </span> !` : ''
+  data: function () {
+    return {
+      player: '',
+      welcomeMessage: ''
+    }
+  },
+  updated: function () {
+    this.welcomeMessage = `Bonjour <span class="player"> ${this.player} </span> !`
+  },
+  methods: {
+    setPlayer: function (event) {
+      let playerName = event.target[0].value
+
+      if (!playerName) {
+        alert('Merci de renseigner votre nom')
+
+        return
+      }
+      this.player = playerName
+    }
   },
   directives: {
-      border: function (el, binding) {
-          el.style.borderColor = binding.arg
-      },
-      hide: function (el, binding, vnode) {
-          let isForm = vnode.tag === 'form'
-          let player = vnode.context.player
-          if (isForm) {
-              el.style.display = player ? 'none' : 'block'
-          } else {
-              el.style.display = player ? 'block' : 'none'
-          }
+    border: function (el, binding) {
+      el.style.borderColor = binding.arg
+    },
+    hide: function (el, binding, vnode) {
+      let isForm = vnode.tag === 'form'
+      let player = vnode.context.player
+      if (isForm) {
+        el.style.display = player ? 'none' : 'block'
+      } else {
+        el.style.display = player ? 'block' : 'none'
       }
+    }
   }
 }
 </script>
