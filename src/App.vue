@@ -1,9 +1,8 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <game></game>
-    <player></player>
-    <score></score>
+    <game :player="player" v-on:score="updateScore"></game>
+    <player v-on:player="updatePlayer"></player>
+    <score :score="score" :player="player"></score>
     <!--<router-view/>-->
   </div>
 </template>
@@ -15,10 +14,24 @@ import Score from './components/Score'
 
 export default {
   name: 'App',
+  data: function () {
+    return {
+      score: 0,
+      player: false
+    }
+  },
   components: {
     Game,
     Score,
     Player
+  },
+  methods: {
+    updateScore: function (score) {
+      this.score = score
+    },
+    updatePlayer: function () {
+      this.player = true
+    }
   }
 }
 </script>
