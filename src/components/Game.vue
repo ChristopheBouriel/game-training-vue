@@ -1,7 +1,8 @@
 <template>
   <div class="content">
-    <div class="game" @click.exact="clickOnInterface" :class="{wait: !player}">
-      <span v-if="player" class="round" :style="roundStyle" :class="{bonus: bonusActivated, badColor: badColorActivated}" @click.exact.stop="clickOnRound" @click.alt.stop="bonus"></span>
+    <div class="game" @click.exact="clickOnInterface" :class="{wait: !player || stopped}">
+      <span class="time" v-if="!stopped">{{ time }}</span>
+      <span v-if="player && !stopped" class="round" :style="roundStyle" :class="{bonus: bonusActivated, badColor: badColorActivated}" @click.exact.stop="clickOnRound" @click.alt.stop="bonus"></span>
     </div>
     <div class="log">
       <p v-for="(item, index) in infoUser" :key=index>
@@ -18,6 +19,7 @@ export default {
   data: function () {
     return {
       click: 0,
+      time: 0,
       roundStyle: {
         height: '50px',
         width: '50px',
@@ -25,7 +27,8 @@ export default {
       },
       bonusActivated: false,
       badColorActivated: false,
-      collection: []
+      collection: [],
+      stopped: true
     }
   },
   computed: {
@@ -33,17 +36,33 @@ export default {
       return this.collection.filter(item => item.type === 'user')
     }
   },
-  created: function () {
-    document.onkeydown = this.start
-  },
   // ici c'est watch car on ne regarde pas une propriété, donc ce n'est pas updated
   watch: {
     click: function () {
       this.updateRound()
       this.$emit('score', this.click)
+    },
+    player: function () {
+      this.stopped = false
+      this.time = 20
+
+      let self = this
+      setInterval(
+        function () {
+          self.updateTime()
+        }, 1000
+      )
     }
   },
   methods: {
+    updateTime: function () {
+      if (this.time === 0) {
+        this.stopped = true
+      }
+      if (!this.stopped) {
+        this.time--
+      }
+    },
     clickOnRound: function (event) {
       setTimeout(this.updateRound, 1000)
       this.updateClick(1)
@@ -63,18 +82,13 @@ export default {
       this.addLog(`Ho no ! - 1`)
     },
     updateClick: function (increment) {
-      if (!this.player) {
+      if (!this.player || this.stopped) {
         return
       }
       if (increment) {
         this.click += increment
       } else {
         this.click--
-      }
-    },
-    start: function (event) {
-      if (event.key === 'Enter') {
-        console.log('START')
       }
     },
     updateRound: function () {
@@ -95,7 +109,7 @@ export default {
       this.roundStyle.margin = `${top}% ${left}%`
     },
     addLog: function (message, type) {
-      if (!this.player) {
+      if (!this.player || this.stopped) {
         return
       }
       let typeOfMessage = type || 'user'
@@ -141,5 +155,12 @@ export default {
     }
     .wait {
       opacity: 0.3
+    }
+    .time {
+      position: absolute;
+      font-size: 4rem;
+      padding-left: 30px;
+      color: darkgoldenrod;
+      opacity: 0.2
     }
 </style>
